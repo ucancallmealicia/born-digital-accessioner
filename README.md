@@ -9,5 +9,7 @@ A simple graphical user interface to create or update archival objects and creat
 
 ## Quick Start
 
-`[my-computer]$ cd /Users/username/filepath/born-digital-accessioner
- [my-computer:born-digital-accessioner]$ python born-dig-accessioner.py`
+```
+[my-computer]$ cd /Users/username/filepath/born-digital-accessioner
+[my-computer:born-digital-accessioner]$ python born-dig-accessioner.py
+``` 
