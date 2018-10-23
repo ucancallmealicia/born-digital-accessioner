@@ -16,4 +16,4 @@ A simple graphical user interface to create or update archival object records an
 
 ## Questions?
 
-More docs coming soon. In the meantime, [email me](alicia.detelich@yale.edu).
+More docs coming soon. In the meantime, [email me](mailto:alicia.detelich@yale.edu).
