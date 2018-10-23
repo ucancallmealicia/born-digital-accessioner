@@ -1,0 +1,33 @@
+Welcome to the Born-Digital Accessioner Help Page!
+
+The Born-Digital Accessioner is a simple graphical user interface created for use by the Yale Digital Accessioning Service (DAS). It utilizes a spradsheet template to batch create or update archival object component records in ArchivesSpace, and to create events in ArchivesSpace related to the processing of digital materials.
+
+To download a blank copy of the DAS spreadsheet template, click File --> Template.
+
+How to Use This Program
+
+1.) Connect to ArchivesSpace
+	a.) Enter ArchivesSpace URL, username and password into designated fields
+	b.) Press Enter or the 'Connect!' button to login
+	c.) You will be prompted to re-enter your credentials if login fails
+2.) Select Input CSV
+	a.) Press 'Select File' button and choose input spreadsheet
+	b.) The selected file will display in the GUI window
+3.) Choose Action
+	a.) If creating new archival objects, press 'Create records' button
+	b.) If updating existing archival objects, press 'Update records' button
+4.) Review Output
+	a.) When script is complete, 
+	b.) To view output spreadsheet, click 'Open Output File'
+	c.) To view program log, click 'Open Log'
+	d.) To view created/updated records in ArchivesSpace staff interface, click 'Open in ArchivesSpace'
+
+Troubleshooting
+
+This program requires properly formed data in order to function. If the program is not working, check the error logs for more detail. Common data issues include:
+	-Improperly formed dates (should be MM/DD/YY or MM/DD/YYYY)
+	-Missing data in spreadsheet, blank rows
+	-Spreadsheet data in wrong row (i.e. date information in an outcome field)
+	-Special characters in spreadsheet
+
+If your data appears correct but the program is still not working, email alicia.detelich@yale.edu for further assistance.
