@@ -85,4 +85,8 @@ If your data looks good and you’re still having issues, check the program log 
 
 ## Questions?
 
+<<<<<<< HEAD
 [Email me](alicia.detelich@yale.edu)
+=======
+More docs coming soon. In the meantime, [email me](mailto:alicia.detelich@yale.edu).
+>>>>>>> 17f234b77e9434cf1929f44ae8fe6e81f177e673
