@@ -10,7 +10,9 @@ A simple graphical user interface to create or update archival object records an
 ## Quick Start
 
 ```
-$ cd /Users/username/file/path/born-digital-accessioner
+$ cd /Users/username/file/path
+$ git clone https://github.com/ucancallmealicia/born-digital-accessioner
+$ cd born-digital-accessioner
 $ python born-dig-accessioner.py
 ``` 
 
@@ -30,7 +32,7 @@ The Born Digital Accessioner was designed to support the following workflow:
 Logs the user into ArchivesSpace. The following data is accepted:
 
 * __ArchivesSpace URL:__ the URL for the ArchivesSpace staff interface. The Born Digital Accessioner automatically appends `/api` to the end of the URL, which conforms to Yale’s URL formatting. Comment out lines 218 - 221 and uncomment line 222 to remove this appendage.
-* __ArchivesSpace username:__ the ArchivesSpace username of the Born Digital Accessioner user. This is the user that will be designated as the Authorizor of any event records created by the program.
+* __ArchivesSpace Username:__ the ArchivesSpace username of the Born Digital Accessioner user. This is the user that will be designated as the Authorizor of any event records created by the program.
 * __ArchivesSpace Password:__ the ArchivesSpace password of the Born Digital Accessioner user.
 
 Clicking the 'Connect!' button will submit login information. 
@@ -55,16 +57,16 @@ Once the script finishes, the user can review various outputs. The total number 
 
 Additionally, three buttons on the right-hand side of the interface allow users to perform the following actions:
 
-* __Open Output CSV:__ All URIs for newly-created records are appended to the data from the original spreadsheet and written to an output CSV. Any records which do not update are written to the output CSV without any URIs. This button will open the output CSV file in the user's default spreadsheet program.
+* __Open Output File:__ All URIs for newly-created records are appended to the data from the original spreadsheet and written to an output CSV. Any records which do not update are written to the output CSV without any URIs. This button will open the output CSV file in the user's default spreadsheet program.
 * __Open Log:__ Opens a detailed program log, which tracks the program's actions and documents errors.
 * __Open in ArchivesSpace:__ If creating new records, this button will open the parent record in ArchivesSpace. If updating existing records, this button will open the last record updated in ArchivesSpace. 
 
 ### Tips
 
 * To clear all data (i.e. login information, file selection, outputs), press the 'Clear Inputs' button at the bottom of the interface
-* To view the Help page, select File > Help
-* To download a blank copy of the DAS spreadsheet template, select File > Template
-* To quit the program, select File > Exit
+* To view the Help page, select _File > Help_ from menu bar
+* To download a blank copy of the DAS spreadsheet template, select _File > Template_ from menu bar
+* To quit the program, select _File > Exit_ from menu bar
 
 ## Troubleshooting
 
@@ -77,7 +79,7 @@ The most common cause of errors is invalid data entered into the DAS spreadsheet
 * Missing data
 * Typos
 
-Most of the time, when the program encounters an error it will move onto the next record without stopping, but this is not always the case. Check the program log if the program stops during execution.
+Most of the time, when the program encounters an error it will move onto the next record without stopping, but this is not always the case. Check the log file if the program stops during execution.
 
 ### Bugs
 
@@ -85,4 +87,4 @@ If your data looks good and you’re still having issues, check the program log 
 
 ## Questions?
 
-[Email me](alicia.detelich@yale.edu)
+[Email me](mailto:alicia.detelich@yale.edu)
