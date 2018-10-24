@@ -219,6 +219,7 @@ class BornDigitalGUI(Frame):
                     self.api_url.set(self.api_url.get() + 'api')
                 else:
                     self.api_url.set(self.api_url.get() + '/api')
+                #self.api_url.set(self.api_url.get())
                 auth = requests.post(self.api_url.get()+'/users/'+self.username.get()+'/login?password='+self.password.get()).json()
                 if 'error' in auth.keys():
                     self.login_confirmed.set('Login failed, try again')
