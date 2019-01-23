@@ -1,5 +1,6 @@
 #/usr/bin/python3
 #~/anaconda3/bin/python
+# -*- coding: utf-8 -*-
 
 from tkinter import StringVar, Tk, Text, Toplevel, Menu, Label, DISABLED, RAISED, RIDGE, SUNKEN, GROOVE, LEFT, LabelFrame, WORD, INSERT, Button, Entry, W, E, N, S, NW, HORIZONTAL, VERTICAL, Frame, messagebox, filedialog, ttk, scrolledtext, Scrollbar, Canvas
 from tkinter.filedialog import askopenfilename
@@ -352,11 +353,12 @@ class BornDigitalGUI(Frame):
         outcome_value = outcome_value.lower()
         # Get the event date - add a check so that if there's only 2 digits for YY make it YYYY
         if date_value != '':
-             if date_value[-4:].isdigit():               
+            if '-' in date_value:
+                date_value = date_value.replace('-', '/')
+            if date_value[-4:].isdigit():
                 date_value = datetime.datetime.strptime(date_value, '%m/%d/%Y').strftime('%Y-%m-%d')
-             else:
+            else:
                 date_value = datetime.datetime.strptime(date_value, '%m/%d/%y').strftime('%Y-%m-%d')
-        # Create a new event, linking to the archival object
         event = {"event_type": event_type, "jsonmodel_type": "event",
                  "outcome": outcome_value,
                  "outcome_note": note_value,
@@ -364,8 +366,8 @@ class BornDigitalGUI(Frame):
                  "linked_records": [{ "role": "source", "ref": '/repositories/'+repo_num+'/archival_objects/'+ao_id }],
                  "date": { "begin": date_value, "date_type": "single", "label": "event", "jsonmodel_type": "date" }}    
         # Post that event
-        event_data = json.dumps(event)
-        event_post = requests.post(self.api_url.get()+'/repositories/'+repo_num+'/events',headers=header_value,data=event_data).json()
+        event_post = requests.post(self.api_url.get()+'/repositories/'+repo_num+'/events',headers=header_value,json=event).json()
+        logging.debug(str(event_post))
         return event_post
 
     def get_top_containers(self, csv_var, repo_dictionary, header_value):
@@ -435,12 +437,9 @@ class BornDigitalGUI(Frame):
                                         if uri != None:
                                             if indicator == top_container:
                                                 top_container = uri
-                                            else:
-                                                logging.debug('Container match not found')
                                         else:
                                             #should continue with script or no??
                                             logging.debug('uri == None')
-                                            logging.debug('Container match not found')
                                 #this runs either the create archival objects or update archival objects script, and returns the result
                                 logging.debug('Calling action function')
                                 updated_component = action(headers, repo, parent_ao_id, component_id, extent, title, top_container)
@@ -452,6 +451,7 @@ class BornDigitalGUI(Frame):
                                         #creating events based on the rows in the spreadsheet
                                         if original_row_length > 9 and row[8] != '':
                                             new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[8], row[9], row[10], cgi.escape(row[11]))
+                                            row.append(new_event['uri'])
                                         if original_row_length > 13 and row[14] != '':
                                             new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[12], row[13], row[14], cgi.escape(row[15]))
                                             row.append(new_event['uri'])
