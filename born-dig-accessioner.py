@@ -441,6 +441,9 @@ class BornDigitalGUI(Frame):
                             #check to see if current user is still the same
                             username_field = row[8]
                             #make sure this works; only resets the user when it's someone new
+                            if username_field == '':
+                                current_user = self.search_agent(username_field, headers)
+                                current_username = self.username.get()
                             if username_field != '' and username_field != current_username:
                                 logging.debug('New user search')
                                 current_user = self.search_agent(username_field, headers)
