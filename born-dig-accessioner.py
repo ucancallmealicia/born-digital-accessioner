@@ -39,6 +39,7 @@ class BornDigitalGUI(Frame):
         self.api_url = StringVar()
         self.username = StringVar()
         self.password = StringVar()
+   #     self.agent_name = StringVar()
         self.login_confirmed = StringVar()
         
         ## Create Step 1 Widgets ##
@@ -47,9 +48,11 @@ class BornDigitalGUI(Frame):
         self.api_url_label = Label(self.login_labelframe, text='ArchivesSpace URL: ', font=('Arial', 13), bg='gainsboro')
         self.username_label = Label(self.login_labelframe, text='ArchivesSpace Username: ', font=('Arial', 13), bg='gainsboro')
         self.password_label = Label(self.login_labelframe, text='ArchivesSpace Password: ', font=('Arial', 13), bg='gainsboro')
+        self.alternate_agent_label = Label(self.login_labelframe, text='Agent Authorizer (Optional):', font=('Arial', 13), bg='gainsboro')
         self.api_url_entry = Entry(self.login_labelframe, width=32, textvariable=self.api_url, highlightthickness=0)
         self.username_entry = Entry(self.login_labelframe, width=32, textvariable=self.username, highlightthickness=0)
         self.password_entry =Entry(self.login_labelframe, width=32, textvariable=self.password, show='*', highlightthickness=0)
+#        self.alternate_agent = Entry(self.login_labelframe, width=32, textvariable=self.agent_name, highlightthickness=0)
         self.login_confirmed_variable = Label(self.login_labelframe, textvariable=self.login_confirmed, width=25, font=('Arial', 13), bg='gainsboro', highlightthickness=0, anchor='e')
         self.connect_button = Button(self.login_labelframe, text='Connect!',command=self.asloginprocess, width=10, relief=RAISED, bd=1, padx=3, pady=3, highlightthickness=0, cursor="hand1")
 
@@ -65,7 +68,9 @@ class BornDigitalGUI(Frame):
         self.password_entry.grid(column=0, row=7, sticky="nw")
         self.login_confirmed_variable.grid(column=1, row=6, sticky="ns")
         self.connect_button.grid(column=1, row=7, sticky="ne")
-        
+ #       self.alternate_agent_label.grid(column=0, row=8, sticky="nw")
+ #       self.alternate_agent.grid(column=0, row=9, sticky="nw")
+
         ########### Step 2: Select Input CSV ###########
 
         ## Set Step 2 Variable Inputs ##
@@ -81,9 +86,9 @@ class BornDigitalGUI(Frame):
         self.fileselect_labelframe.grid(column=0, columnspan=2, sticky="nsew", padx=5, pady=5)  
         self.fileselect_labelframe.grid_rowconfigure(0, weight=1)
         self.fileselect_labelframe.grid_columnconfigure(0, weight=1)
-        self.input_csv_button.grid(column=1, row=9, sticky='se')
-        self.file_selected_label.grid(column=0, columnspan=1, row=10, sticky='w')
-        self.selected_csv_variable.grid(column=0, row=11, columnspan=2, sticky='w')
+        self.input_csv_button.grid(column=1, row=10, sticky='se')
+        self.file_selected_label.grid(column=0, columnspan=1, row=11, sticky='w')
+        self.selected_csv_variable.grid(column=0, row=12, columnspan=2, sticky='w')
 
         ## Set Step _ Variable Inputs ##
         self.csv_output = StringVar()
@@ -99,8 +104,8 @@ class BornDigitalGUI(Frame):
         self.action_labelframe.grid(column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
         self.action_labelframe.grid_rowconfigure(0, weight=1)
         self.action_labelframe.grid_columnconfigure(0, weight=1)
-        self.create_components_button.grid(row=12, columnspan=2)
-        self.update_components_button.grid(row=13, columnspan=2)
+        self.create_components_button.grid(row=13,columnspan=2)
+        self.update_components_button.grid(row=14, columnspan=2)
 
         ########### Step 4: Review Output ###########
 
@@ -132,16 +137,16 @@ class BornDigitalGUI(Frame):
         self.output_labelframe.grid(column=0, columnspan=2, sticky="nsew", padx=5, pady=5)   
         self.output_labelframe.grid_rowconfigure(0, weight=1)
         self.output_labelframe.grid_columnconfigure(0, weight=1)
-        self.script_status_variable.grid(column=1, row=14, sticky='e')
-        self.record_updates_attempted_label.grid(column=0, row=15)
-        self.records_updated_successsfully_label.grid(column=0, row=16)
-        self.elapsed_time_label.grid(column=0, row=17)
-        self.record_updates_attempted_variable.grid(column=1, row=15, sticky='w')
-        self.records_updated_successsfully_variable.grid(column=1, row=16, sticky='w')
-        self.elapsed_time_variable.grid(column=1, row=17, sticky='w')     
-        self.view_output_file_button.grid(column=1, row=18, sticky="ne")
-        self.view_error_log_button.grid(column=1, row=19, sticky="ne")
-        self.view_url_button.grid(column=1, row=20, sticky="ne")
+        self.script_status_variable.grid(column=1, row=15, sticky='e')
+        self.record_updates_attempted_label.grid(column=0, row=16)
+        self.records_updated_successsfully_label.grid(column=0, row=17)
+        self.elapsed_time_label.grid(column=0, row=18)
+        self.record_updates_attempted_variable.grid(column=1, row=16, sticky='w')
+        self.records_updated_successsfully_variable.grid(column=1, row=17, sticky='w')
+        self.elapsed_time_variable.grid(column=1, row=18, sticky='w')     
+        self.view_output_file_button.grid(column=1, row=19, sticky="ne")
+        self.view_error_log_button.grid(column=1, row=20, sticky="ne")
+        self.view_url_button.grid(column=1, row=21, sticky="ne")
         
         ## Clear Inputs, Help Buttons
         
@@ -150,7 +155,7 @@ class BornDigitalGUI(Frame):
         self.clear_labelframe.grid_rowconfigure(0, weight=1)
         self.clear_labelframe.grid_columnconfigure(0, weight=1)
         self.clear_all_inputs_button = Button(self.clear_labelframe, text='Clear Inputs', command=self.clear_inputs, relief=RAISED, bd=1, padx=5, pady=5, highlightthickness=0, cursor="hand1")
-        self.clear_all_inputs_button.grid(column=0, row=21)
+        self.clear_all_inputs_button.grid(column=0, row=22)
         
         #Initiates error logging
         self.error_log()
@@ -326,10 +331,8 @@ class BornDigitalGUI(Frame):
                      "extents": [{ "number": '1', "portion": "whole", "extent_type": extent_type, "jsonmodel_type": "extent"}],
                      "resource": {"ref": '/repositories/'+repo_num+'+/resources/'+self.resource_id.get()},
                      "parent": {"ref": '/repositories/'+repo_num+'/archival_objects/'+ao_id}}
-        #convert the data back into JSON
-        child_component_data = json.dumps(child_component)      
         #Post the child archival object
-        child_post = requests.post(self.api_url.get()+'/repositories/'+repo_num+'/archival_objects',headers=header_value,data=child_component_data).json()
+        child_post = requests.post(self.api_url.get()+'/repositories/'+repo_num+'/archival_objects',headers=header_value,json=child_component).json()
         return child_post
     
     #Don't use all of those arguments,but need them to make action() work - can I use ***kwargs in the action part?); or default arguments
@@ -340,13 +343,11 @@ class BornDigitalGUI(Frame):
         component_json['component_id'] = unit_id
         #updates extent
         component_json['extents']= [{ "number": '1', "portion": "whole", "extent_type": extent_type, "jsonmodel_type": "extent"}]
-        component_data = json.dumps(component_json)
-        component_post = requests.post(self.api_url.get()+'/repositories/'+repo_num+'/archival_objects/'+ao_id,headers=header_value,data=component_data).json()
+        component_post = requests.post(self.api_url.get()+'/repositories/'+repo_num+'/archival_objects/'+ao_id,headers=header_value,json=component_json).json()
         return component_post
     
     def create_event (self, header_value, user, ao_id, repo_num, event_type, outcome_value, date_value, note_value):
         '''This function creates an event in ASpace, based on the four possible parameters provided in the born-digital accessioning worksheet'''
-        agent_authorizor = user['agent_record']['ref']
         # Get the event type
         event_type = event_type.lower()
         # Get the event outcome
@@ -362,12 +363,12 @@ class BornDigitalGUI(Frame):
         event = {"event_type": event_type, "jsonmodel_type": "event",
                  "outcome": outcome_value,
                  "outcome_note": note_value,
-                 "linked_agents": [{ "role": "authorizer", "ref": agent_authorizor }],
+                 "linked_agents": [{ "role": "authorizer", "ref": user}],
                  "linked_records": [{ "role": "source", "ref": '/repositories/'+repo_num+'/archival_objects/'+ao_id }],
                  "date": { "begin": date_value, "date_type": "single", "label": "event", "jsonmodel_type": "date" }}    
         # Post that event
         event_post = requests.post(self.api_url.get()+'/repositories/'+repo_num+'/events',headers=header_value,json=event).json()
-        logging.debug(str(event_post))
+        #logging.debug(str(event_post))
         return event_post
 
     def get_top_containers(self, csv_var, repo_dictionary, header_value):
@@ -384,22 +385,44 @@ class BornDigitalGUI(Frame):
             tuplelist.append((top_container['uri'], top_container['indicator']))
         return tuplelist
 
+    def search_agent(self, user_name, headervalue):
+        if user_name == '':
+            cur_user = requests.get(self.api_url.get() + '/users/current-user', headers=headervalue).json()
+            agent_uri = cur_user['agent_record']['ref']
+            return agent_uri
+        else:
+            search_agent = requests.get(self.api_url.get() + '/search?page=1&type[]=agent_person&q=title:' + user_name, headers=headervalue).json()
+            if search_agent['total_hits'] == 1:
+                logging.debug('Search agent: result found for ' + user_name)
+                agent_uri = search_agent['results'][0]['uri']
+                return agent_uri
+            if search_agent['total_hits'] == 0:
+                logging.debug('Search agent error: no results found')
+                messagebox.showerror('Error!'       'No agent authorizer found.')
+                return
+            if search_agent['total_hits'] > 1:
+                messagebox.showerror('Error!'       'Multiple agent authorizer matches. Please refine search.')
+                logging.debug('Search agent error: multiple results found')
+                return
+
     #this function runs when either the create or update button is pushed. When the create button is pressed, the action variable takes
     #on the value of the create function, and when the update button is pressed the action variable takes the value of the update function
     def process_file(self, action):
         #Initiates the confirmation dialog
         go = self.areyousure()
+        #just if go?
         if go == True:
             #captures start time
             starttime = time.time()
             headers = self.get_headers()
             if headers != None:
-                #Gets current user - Kevin has proposed changing this to accept a user besides the current user
-                current_user = requests.get(self.api_url.get() + '/users/current-user', headers=headers).json()
                 repo_dict = self.repos(headers)
                 csvfile = self.opencsv()
                 csvlist = [row for row in csvfile]
-                #takes the resource id and sets it as a StringVar
+                logging.debug('Setting user')
+                current_username = csvlist[0][8]
+                current_user = self.search_agent(current_username, headers)
+                #takes the resource id and sets it as a StringVar       
                 logging.debug('Setting resource ID')
                 if '/#' in str(csvlist[0][2]):
                     self.resource_id.set(csvlist[0][2].partition('/#')[0].rpartition('/')[2])
@@ -414,7 +437,15 @@ class BornDigitalGUI(Frame):
                     fileobject, csvoutfile = self.outputcsv()
                     try:
                         for i, row in enumerate(csvlist, 1):
-                            logging.debug('Working on row ' + str(i))                      
+                            logging.debug('Working on row ' + str(i))
+                            #check to see if current user is still the same
+                            username_field = row[8]
+                            #make sure this works; only resets the user when it's someone new
+                            if username_field != '' and username_field != current_username:
+                                logging.debug('New user search')
+                                current_user = self.search_agent(username_field, headers)
+                                current_username = username_field
+                                logging.debug('New user results: ' + str(current_user))
                             #should be a better way to skip empty/invalid rows, but i've added this for now - CHANGE THIS!!!!
                             if row[0] in repo_dict:
                                 # save the original row length - used to get event data later on
@@ -439,7 +470,7 @@ class BornDigitalGUI(Frame):
                                                 top_container = uri
                                         else:
                                             #should continue with script or no??
-                                            logging.debug('uri == None')
+                                            logging.debug('uri None')
                                 #this runs either the create archival objects or update archival objects script, and returns the result
                                 logging.debug('Calling action function')
                                 updated_component = action(headers, repo, parent_ao_id, component_id, extent, title, top_container)
@@ -448,18 +479,18 @@ class BornDigitalGUI(Frame):
                                     if 'uri' in updated_component: 
                                         updated_component_uri = updated_component['uri']
                                         row.append(updated_component_uri)
-                                        #creating events based on the rows in the spreadsheet
-                                        if original_row_length > 9 and row[8] != '':
-                                            new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[8], row[9], row[10], cgi.escape(row[11]))
+                                        #creating events based on the rows in the spreadsheet - CHANGE TO CSVDICT
+                                        if original_row_length > 10 and row[9] != '':
+                                            new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[9], row[10], row[11], cgi.escape(row[12]))
                                             row.append(new_event['uri'])
-                                        if original_row_length > 13 and row[14] != '':
-                                            new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[12], row[13], row[14], cgi.escape(row[15]))
+                                        if original_row_length > 14 and row[15] != '':
+                                            new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[13], row[14], row[15], cgi.escape(row[16]))
                                             row.append(new_event['uri'])
-                                        if original_row_length > 17 and row[16] != '':
-                                            new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[16], row[17], row[18], cgi.escape(row[19]))
+                                        if original_row_length > 18 and row[17] != '':
+                                            new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[17], row[18], row[19], cgi.escape(row[20]))
                                             row.append(new_event['uri'])
-                                        if original_row_length > 21 and row[20] != '':
-                                            new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[20], row[21], row[22], cgi.escape(row[23]))
+                                        if original_row_length > 22 and row[21] != '':
+                                            new_event = self.create_event(headers, current_user, updated_component_uri, repo, row[21], row[22], row[23], cgi.escape(row[24]))
                                             row.append(new_event['uri'])
                                         x = self.process_results(updated_component, x)
                                         csvoutfile.writerow(row)
@@ -513,13 +544,12 @@ class BornDigitalGUI(Frame):
                             format='%(asctime)s %(levelname)s %(name)s %(message)s')
 
     def process_results(self, jsonname, counter):
-        for key, value in jsonname.items():
-            if key == 'status':
-                counter +=1
-                return counter
-            if key == 'error':
-                logging.debug(str(datetime.datetime.now()))
-                logging.debug(str(jsonname.get('error')))
+        if 'status' in jsonname:
+            counter +=1
+            return counter
+        if 'error' in jsonname:       
+            logging.debug(str(datetime.datetime.now()))
+            logging.debug(str(jsonname.get('error')))
 
 ### WIDGET FILE HANDLING ###
 
