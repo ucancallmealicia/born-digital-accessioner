@@ -16,6 +16,7 @@ import signal
 import json
 from ast import literal_eval
 from collections import deque
+import sys
 
 import dash
 import dash_html_components as html
@@ -38,7 +39,12 @@ TO-DO - progress bar instead of log printing.
 
 '''
 
-def serve_layout():
+#FIX
+#EXE_PATH = os.getcwd()
+EXE_PATH = sys.executable.replace('/born-dig-accessioner', '')
+
+def serve_layout(EXE_PATH=EXE_PATH):
+    #eventually move these into an external config file
     archivesspace_instances = [{'label': 'PROD', 'value': 'https://archivesspace.library.yale.edu/api'},
             {'label': 'TEST', 'value': 'https://testarchivesspace.library.yale.edu/api'},
             {'label': 'DEV', 'value': 'https://devarchivesspace.library.yale.edu/api'},
@@ -61,11 +67,11 @@ def serve_layout():
                                                                     html.Div(children=[dcc.Dropdown(id="input_file_dropdown",
                                                                                            multi=False,
                                                                                            placeholder='Select an input file',
-                                                                                           options=[{"label": i, "value": 'data/api_inputs/' + i} for i in os.listdir('data/api_inputs') if i != '.DS_Store' and i != 'excel_sheets' and '.~lock' not in i], className='drop')], className='dropdown'),
+                                                                                           options=[{"label": i, "value": 'data/api_inputs/' + i} for i in os.listdir(f'{EXE_PATH}/data/api_inputs') if i != '.DS_Store' and i != 'excel_sheets' and '.~lock' not in i], className='drop')], className='dropdown'),
                                                                     html.Div(children=[dcc.Dropdown(id="backup_folder_dropdown",
                                                                                            multi=False,
                                                                                            placeholder='Select a backup directory',
-                                                                                           options=[{"label": i, "value": 'data/json_backups/' + i} for i in next(os.walk('data/json_backups'))[1]], className='drop')], className='dropdown')], className='dropdown_container'),
+                                                                                           options=[{"label": i, "value": 'data/json_backups/' + i} for i in next(os.walk(f'{EXE_PATH}/data/json_backups'))[1]], className='drop')], className='dropdown')], className='dropdown_container'),
                                                  html.Div(children=dcc.RadioItems(id="create_update_selection",
                                                                         options=[{"label": "Create records", "value": "create"}, {"label": "Update records", "value": "update"}],
                                                                         labelStyle={'display': 'inline-block', 'padding-left': '5px', 'padding-right': '20px'}), className='api_checklist'),
@@ -97,18 +103,21 @@ def serve_layout():
                                         className='footer_div_style')], className='footer_style')], className='app_container')])
 
 #external_stylesheets=[dbc.themes.BOOTSTRAP]
-app = dash.Dash(__name__)
+print(f"{EXE_PATH}/assets")
+app = dash.Dash(__name__, assets_folder=f"{EXE_PATH}/assets")
 #app.config.suppress_callback_exceptions = True
 app.layout = serve_layout
 
 
-def setup_logging(default_path='data/logs/logging_config.yml', default_level=logging.DEBUG):
+def setup_logging(default_path=f'{EXE_PATH}/data/logs/logging_config.yml', default_level=logging.DEBUG, EXE_PATH=EXE_PATH):
     '''Sets up logging configuration'''
     print(f'Setting up logging in {__name__}')
     fp = default_path
     if os.path.exists(fp):
         with open(fp, 'r') as file_path:
             config = yaml.safe_load(file_path.read())
+            config['handlers']['debug_file_handler']['filename'] = f'{EXE_PATH}/data/logs/debug.log'
+            config['handlers']['error_file_handler']['filename'] = f'{EXE_PATH}/data/logs/errors.log'
             logging.config.dictConfig(config)
     else:
         logging.basicConfig(level=default_level)
@@ -159,36 +168,36 @@ def opencsv(input_csv=None):
         h, c = opencsv()
         return h, c
 
-def config_file_helper(value, config_type):
-    with open('data/config.json', 'r', encoding='utf-8') as config_file:
+def config_file_helper(value, config_type, EXE_PATH=EXE_PATH):
+    with open(f'{EXE_PATH}/data/config.json', 'r', encoding='utf-8') as config_file:
         cfg = json.load(config_file)
     cfg[config_type] = value
-    with open('data/config.json', 'w', encoding='utf-8') as config_file:
+    with open(f'{EXE_PATH}/data/config.json', 'w', encoding='utf-8') as config_file:
         json.dump(cfg, config_file)
     return value
 
-def save_session(session, api_url):
+def save_session(session, api_url, EXE_PATH=EXE_PATH):
     if 'archivesspace' in api_url:
         fpname = api_url[8:-21]
     elif 'local' in api_url:
         fpname = 'local'
-    with open(f'data/sessions/{fpname}.pkl', 'wb') as out_strm:
+    with open(f'{EXE_PATH}/data/sessions/{fpname}.pkl', 'wb') as out_strm:
         pickle.dump(session, out_strm)
-        return f'data/sessions/{fpname}.pkl'
+        return f'{EXE_PATH}/data/sessions/{fpname}.pkl'
 
-def load_session(api_url, session_list, session=None, session_file=None):
+def load_session(api_url, session_list, EXE_PATH=EXE_PATH, session=None, session_file=None):
     if ('local' in api_url and 'local.pkg' in session_list):
-        session_file = 'data/sessions/local.pkl'
+        session_file = f'{EXE_PATH}/data/sessions/local.pkl'
         session = pickle.load(open(session_file, 'rb'))
     else:
-        sessions = [(pickle.load(open(f'data/sessions/{sesh}', 'rb')), f'data/sessions/{sesh}') for sesh in session_list if api_url[8:-21] == sesh[:-4]]
+        sessions = [(pickle.load(open(f'{EXE_PATH}/data/sessions/{sesh}', 'rb')), f'{EXE_PATH}/data/sessions/{sesh}') for sesh in session_list if api_url[8:-21] == sesh[:-4]]
         if sessions:
             session = sessions[0][0]
             session_file = sessions[0][1]
     return session, session_file
 
-def as_session(api_url, username, password, session=None):
-    session_list = os.listdir('data/sessions')
+def as_session(api_url, username, password, EXE_PATH=EXE_PATH, session=None):
+    session_list = os.listdir(f'{EXE_PATH}/data/sessions')
     session, session_file = load_session(api_url, session_list)
     if (session == [] or session == None):
         try:
@@ -265,11 +274,11 @@ def opencsvdict(input_csv=None):
 @app.callback([Output('selected_0', 'data')
     , Output('object_store', 'data')],
     [Input('api_instance_checklist', 'value')])
-def select_api_instance(value):
+def select_api_instance(value, EXE_PATH=EXE_PATH):
     '''Modifies the config file to a user-selected ArchivesSpace instance'''
     if value:
         config_file_helper(value, 'api_url')
-        with open('data/config.json') as cfg_file:
+        with open(f'{EXE_PATH}/data/config.json') as cfg_file:
             config_file = json.load(cfg_file)
             sesh, sesh_file = as_session(config_file['api_url'], config_file['api_username'], config_file['api_password'])
             #logging.debug(sesh_file)
@@ -303,14 +312,14 @@ def select_backup_directory(value):
     [Input('input_file_dropdown', 'value')],
     [State('selected_0', 'data'),
      State('object_store', 'data')])
-def set_agent(input_file, api_url, session_file_path):
+def set_agent(input_file, api_url, session_file_path, EXE_PATH=EXE_PATH):
     if input_file:
         if session_file_path:
             with open(session_file_path, 'rb') as session_file_p:
                 session_data = pickle.load(session_file_p)
                 #logging.debug(session_data)
             if api_url:
-                with open('data/config.json') as cnfg_file:
+                with open(f'{EXE_PATH}/data/config.json') as cnfg_file:
                     config_file = json.load(cnfg_file)
                     '''Alternatively this can be set within the CSV file itself - that's how Mary has her spreadsheet set up'''
                     agent_authorizer = config_file['agent_authorizer']
@@ -463,9 +472,9 @@ def start_process(func_selection, n_clicks, s_clicks, confirm, api_url, parent_i
 @app.callback([Output('display_log', 'children'), Output('log-update', 'interval')],
     [Input('are_you_surrre', 'submit_n_clicks'), Input('stop_time', 'n_clicks'), Input('log-update', 'n_intervals')],
     [State('log-update', 'interval')])
-def display_log(n_clicks, s_clicks, n_intervals, the_interval):
+def display_log(n_clicks, s_clicks, n_intervals, the_interval, EXE_PATH=EXE_PATH):
     if n_clicks:
-        with open('data/logs/debug.log', 'r', encoding='utf-8') as lfile:
+        with open(f'{EXE_PATH}/data/logs/debug.log', 'r', encoding='utf-8') as lfile:
             last_30 = deque(lfile, 30)
             if (s_clicks == 0 and n_clicks > 0):
                 return html.Div(list(last_30)), 1000
@@ -596,7 +605,7 @@ def process_event_rows(row, agent_uri, repo_id, updated_component, api_url, head
 if __name__ == '__main__':
     logger_ob = setup_logging()
     logger = bd_logger(logger_ob)
-    app.run_server(debug=True)
+    app.run_server(debug=False)
 
 
 

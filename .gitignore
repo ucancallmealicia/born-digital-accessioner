@@ -17,6 +17,8 @@
 *.project
 *.pydevproject
 
+#pyinstaller spec file
+*.born-dig-accessioner.spec
 
 # My password file
 
