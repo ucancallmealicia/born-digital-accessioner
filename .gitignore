@@ -17,7 +17,7 @@
 *.project
 *.pydevproject
 
-*.born-dig-accessioner.spec
+*born-dig-accessioner.spec
 
 #pyinstaller spec file
 
