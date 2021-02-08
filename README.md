@@ -19,7 +19,7 @@ There are two ways to download the application:
 
 ### Populate configuration file and data folders
 
-The application takes several inputs from the user, which are managed in the included `data` folder in within the main application folder.
+The application takes several inputs from the user, which are managed in the included `data` folder.
 
 ##### `config.json`
 
