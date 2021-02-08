@@ -1,22 +1,6 @@
 # born-digital-accessioner
 
-A simple graphical user interface to create or update archival object records and create associated event records _en masse_ via the ArchivesSpace API. Written for [Yale Digital Accessioning Service (DAS)](https://guides.library.yale.edu/c.php?g=300384&p=3593184) workflows.
-
-## Requirements
-* Python 3.4+
-* `requests` module
-* ArchivesSpace 2.1+
-
-## Quick Start
-
-```
-$ cd /Users/username/file/path
-$ git clone https://github.com/ucancallmealicia/born-digital-accessioner
-$ cd born-digital-accessioner
-$ python born-dig-accessioner.py
-``` 
-
-__COMING SOON:__ .exe and .app versions with all dependencies packaged into a single file or directory.
+A simple interface to create or update archival object records and create associated event records in bulk via the ArchivesSpace API. Written for [Yale Digital Accessioning Service (DAS)](https://guides.library.yale.edu/c.php?g=300384&p=3593184) workflows.
 
 ## Tutorial
 
@@ -25,23 +9,57 @@ The Born Digital Accessioner was designed to support the following workflow:
 1. During physical processing of archival collections, archivists from special collections repositories across Yale document all digital media items in the DAS spreadsheet template.
 2. Repository staff send the physical media and completed template to the Digital Accessioning Service. 
 3. DAS staff perform assorted preservation actions, and add the type of action, the outcome, and the date performed to each row of the DAS spreadsheet template.
-4. DAS staff ingest the DAS spreadsheet into the Born Digital Accessioner, which either updates existing ArchivesSpace archival object records for the born digital materials, or creates new ones. In either case, event records are also created for each of the preservation actions performed by the Digital Accessioning Service.
+4. __DAS staff ingest the DAS spreadsheet into the Born Digital Accessioner, which either updates existing ArchivesSpace archival object records for the born digital materials, or creates new ones. In either case, event records are also created for each of the preservation actions performed by the Digital Accessioning Service.__
 
-### Step 1: Connect to ArchivesSpace
+### Download application
 
-Logs the user into ArchivesSpace. The following data is accepted:
+Download the application and its supporting files either by entering `git clone https://github.com/ucancallmealicia/born-digital-accessioner` into your Terminal or Prompt, or by clicking the green Code button in the top left corner of the repository and selecting Download ZIP. Extract the folder and save it to your filesystem.
 
-* __ArchivesSpace URL:__ the URL for the ArchivesSpace staff interface. The Born Digital Accessioner automatically appends `/api` to the end of the URL, which conforms to Yale’s URL formatting. Comment out lines 218 - 221 and uncomment line 222 to remove this appendage.
-* __ArchivesSpace Username:__ the ArchivesSpace username of the Born Digital Accessioner user. This is the user that will be designated as the Authorizor of any event records created by the program.
-* __ArchivesSpace Password:__ the ArchivesSpace password of the Born Digital Accessioner user.
+### Populate configuration file and data folders
 
-Clicking the 'Connect!' button will submit login information. 
+The application takes a number of inputs from the user, which are managed in the included `data` folder in within the main application folder.
 
-### Step 2: Select Input CSV
+#### `config.json`
 
-Allows the user to select the DAS spreadsheet template from a file menu by pressing the ‘Select File’ button. The path to the selected file will display in the interface.
+This file stores the user's ArchivesSpace login information. The user is only required to populate the the "api_username" and "api_password" fields. The other settings can be managed within the application. 
 
-### Step 3: Choose Action
+The "agent_authorizer" field is optional, and should only be populated when the person who was responsible for completing the PII scan or any other events listed on the spreadsheet is different from the person who is running the application. If this is the case, enter the first and last name of the implementer/authorizer in the "agent_authorizer" field - i.e "John Doe". Be sure before running the script that the implementer/authorizer has an agent record in ArchivesSpace.
+
+#### `data/api_inputs`
+
+Within the data folder is another folder entitled `api_inputs`. Place any completed DASS spreadsheets in this folder to access them within the application. If you add any new spreadsheets while the application is running, you can refresh your browser to see them in the app dropdown.
+
+#### `data/json_backups`
+
+Also within the data folder is a folder entitled `json_backups`. This folder stores backups created when existing ArchivesSpace records are updated by the application. 
+
+To keep your backups organized, you should create a folder within the `json_backups` folder to store backups for each spreadsheet.
+
+If you add new folders while the application is running, you can refresh your browser to see them in the app dropdown.
+
+### Open application
+
+The application can be run either by executing the `born-dig-accessioner.py` script in the Terminal, or by double-clicking on the appropriate executable. Windows users should double-click the `.exe` version and Mac users should double-click the unix executable.
+
+A Terminal or Prompt window will open which indicates that the application is starting. Once you see the 'Debug mode: off' message, you can navigate to `http://127.0.0.1:8050/` in your browser to begin using the application.
+
+__NOTE:__ The mechanism for packaging the applications and managing the various related files and folders is still being finalized. If Mac users are unable to start the application by clicking on the executable file, open a Terminal window, drag and drop the file into the window, and press 'return'.
+
+__NOTE:__ This application is still in development, and runs on a development server. Once additional YUL staff members have tested the application it will be moved to a production-suitable server.
+
+### Choose ArchivesSpace instance
+
+The user can select an ArchivesSpace instance to work on by selecting one of the radio buttons. Per YAMS API best practices, updates must be run in DEV or TEST before running in PROD.
+
+Only select 'Local' if you have a local instance of ArchivesSpace actively running on your computer.
+
+### Select input source and output destination
+
+Choose an input file by clicking the 'Select an input file' dropdown and highlighting your desired file. Be sure that you have added at least one spreadsheet to the 
+
+Next, select your backup directory by clicking the 'Select a backup directory' dropdown and highlighting your desired directory. You do not have to select a backup directory if you are creating new ArchivesSpace records.
+
+### Select action: `Create records` or `Update records`
 
 The user chooses an action by clicking either the ‘Create records’ or ‘Update records’ buttons.
 
@@ -53,20 +71,13 @@ __NOTE:__ Archival object records can be created or updated even if no event dat
 
 ### Step 4: Review Outputs
 
-Once the script finishes, the user can review various outputs. The total number of archival object records created or updated, the total number of create/update attempts, and the amount of time the program took to run will appear at the bottom of the interface.
+While the script is running, the output logs will print to the browser window. These give a rough indication of the progress of the application, but please note that the formatting is still in development.
 
-Additionally, three buttons on the right-hand side of the interface allow users to perform the following actions:
+Once the script finishes, the user can review various outputs. A copy of the original spreadsheet data plus all new ArchivesSpace URIs is saved to the `/data/api_inputs` folder upon completion. The log files for the script are stored in the `/data/logs` folder. All JSON backups for updated ArchivesSpace records will be stored in a folder within the `data/json_backups` folder.
 
-* __Open Output File:__ All URIs for newly-created records are appended to the data from the original spreadsheet and written to an output CSV. Any records which do not update are written to the output CSV without any URIs. This button will open the output CSV file in the user's default spreadsheet program.
-* __Open Log:__ Opens a detailed program log, which tracks the program's actions and documents errors.
-* __Open in ArchivesSpace:__ If creating new records, this button will open the parent record in ArchivesSpace. If updating existing records, this button will open the last record updated in ArchivesSpace. 
+## Tips
 
-### Tips
-
-* To clear all data (i.e. login information, file selection, outputs), press the 'Clear Inputs' button at the bottom of the interface
-* To view the Help page, select _File > Help_ from menu bar
-* To download a blank copy of the DAS spreadsheet template, select _File > Template_ from menu bar
-* To quit the program, select _File > Exit_ from menu bar
+If you intend to run more than one spreadsheet, refresh your browser to clear the on-screen logs and the current input. Trying to select a new spreadsheet without refreshing the browser may result in an error reading the configuration file (this bug is currently being addressed, but the cause of the issue is unclear).
 
 ## Troubleshooting
 

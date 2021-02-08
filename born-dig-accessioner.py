@@ -40,8 +40,11 @@ TO-DO - progress bar instead of log printing.
 '''
 
 #FIX
-#EXE_PATH = os.getcwd()
-EXE_PATH = sys.executable.replace('/born-dig-accessioner', '')
+EXE_PATH = os.getcwd()
+#EXE_PATH = sys.executable.replace('/born-dig-accessioner', '')
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 def serve_layout(EXE_PATH=EXE_PATH):
     #eventually move these into an external config file
@@ -429,7 +432,7 @@ def start_process(func_selection, n_clicks, s_clicks, confirm, api_url, parent_i
                 session_data = pickle.load(session_file_path)
             n_clicks += 1
             if n_clicks > 0 and s_clicks == 0:
-                if backup_dir and input_file:
+                if input_file:
                     try:
                         csvfile, fieldnames = opencsvdict(input_file)
                         extra_fieldnames = ['New_Component_URI', 'Event_URI_1', 'Event_URI_2', 'Event_URI_3']
@@ -442,12 +445,15 @@ def start_process(func_selection, n_clicks, s_clicks, confirm, api_url, parent_i
                             row['Title'] = html_core.escape(row['Title'])
                             row['Parent Record'] = str(row['Parent Record']).rpartition("_")[2]
                             if func_selection == 'update':
-                                #logging.debug('This part is running now')
-                                top_container_list = get_top_containers(api_url, session_data, repo_id, row['Parent Record'])
-                                #logging.debug(top_container_list)
-                                row['Top Container'] = match_containers(top_container_list, row['Top Container'])
-                                #logging.debug(row['Top Container'])
-                                component, endpoint = update_child_component(row, session_data, api_url, row['Parent Record'], repo_id)
+                                if backup_dir:
+                                    #logging.debug('This part is running now')
+                                    top_container_list = get_top_containers(api_url, session_data, repo_id, row['Parent Record'])
+                                    #logging.debug(top_container_list)
+                                    row['Top Container'] = match_containers(top_container_list, row['Top Container'])
+                                    #logging.debug(row['Top Container'])
+                                    component, endpoint = update_child_component(row, session_data, api_url, row['Parent Record'], repo_id)
+                                else:
+                                    raise dash.exceptions.PreventUpdate()
                             elif func_selection == 'create':
                                 row['Top Container'] = match_containers(top_container_list, row['Top Container'])
                                 component, endpoint = create_child_component(row, repo_id, parent_id, resource_id)
