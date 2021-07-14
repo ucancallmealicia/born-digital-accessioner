@@ -42,6 +42,7 @@ TO-DO - progress bar instead of log printing.
 #FIX
 EXE_PATH = os.getcwd()
 #EXE_PATH = sys.executable.replace('/born-dig-accessioner', '')
+print(EXE_PATH)
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -70,11 +71,11 @@ def serve_layout(EXE_PATH=EXE_PATH):
                                                                     html.Div(children=[dcc.Dropdown(id="input_file_dropdown",
                                                                                            multi=False,
                                                                                            placeholder='Select an input file',
-                                                                                           options=[{"label": i, "value": 'data/api_inputs/' + i} for i in os.listdir(f'{EXE_PATH}/data/api_inputs') if i != '.DS_Store' and i != 'excel_sheets' and '.~lock' not in i], className='drop')], className='dropdown'),
+                                                                                           options=[{"label": i, "value": f"{EXE_PATH}/data/api_inputs/" + i} for i in os.listdir(f'{EXE_PATH}/data/api_inputs') if i != '.DS_Store' and i != 'excel_sheets' and '.~lock' not in i], className='drop')], className='dropdown'),
                                                                     html.Div(children=[dcc.Dropdown(id="backup_folder_dropdown",
                                                                                            multi=False,
                                                                                            placeholder='Select a backup directory',
-                                                                                           options=[{"label": i, "value": 'data/json_backups/' + i} for i in next(os.walk(f'{EXE_PATH}/data/json_backups'))[1]], className='drop')], className='dropdown')], className='dropdown_container'),
+                                                                                           options=[{"label": i, "value": f'{EXE_PATH}/data/json_backups/' + i} for i in next(os.walk(f'{EXE_PATH}/data/json_backups'))[1]], className='drop')], className='dropdown')], className='dropdown_container'),
                                                  html.Div(children=dcc.RadioItems(id="create_update_selection",
                                                                         options=[{"label": "Create records", "value": "create"}, {"label": "Update records", "value": "update"}],
                                                                         labelStyle={'display': 'inline-block', 'padding-left': '5px', 'padding-right': '20px'}), className='api_checklist'),
@@ -160,16 +161,18 @@ def opencsv(input_csv=None):
             input_csv = input('Please enter path to CSV: ')
         if input_csv == 'quit':
             quit()
-        file = open(input_csv, 'r', encoding='utf-8')
-        csvin = csv.reader(file)
-        headline = next(csvin, None)
-        return headline, csvin
+        filep = open(input_csv, 'r', encoding='utf-8')
+        csvin = csv.reader(filep)
+        # skips the first two
+        for i in range(2):
+            next(csvin)
+        return csvin
     except:
         logging.exception('Error: ')
         logging.debug('Trying again...')
         logging.debug('CSV not found. Please try again. Enter "quit" to exit')
-        h, c = opencsv()
-        return h, c
+        c = opencsv()
+        return c
 
 def config_file_helper(value, config_type, EXE_PATH=EXE_PATH):
     with open(f'{EXE_PATH}/data/config.json', 'r', encoding='utf-8') as config_file:
@@ -259,7 +262,7 @@ def opencsvdictout(output_csv=None, col_names=None):
 def opencsvdict(input_csv=None):
     """Opens a CSV in DictReader mode."""
     '''Fieldnames currently hardcoded because I need to fix the formatting of the CSV reader, since there are instructions embedded in the cells of the first row that get split into different rows when I try to parse the file before reading it into the CSV dict '''
-    fieldnames = ['Repository Name', 'Security Tag', 'Parent Record', 'Title', 'Component Unique ID', 'Type_1', 'Type_2_Number', 'Type_2', 'Top Container', 'Collection Name', 'Event_Type_1', 'Outcome_1', 'Begin_1', 'Outcome_Note_1', 'Event_Type_2', 'Outcome_2', 'Begin_2', 'Outcome_Note_2', 'Event_Type_3', 'Outcome_3', 'Begin_3', 'Outcome_Note_3', 'Authorizer']
+    fieldnames = ['Repository Name', 'Security Tag', 'Parent Record', 'Title', 'Component Unique ID', 'Type_1', 'Number_of_bytes', 'Container_Summary', 'Top Container', 'Collection Name', 'Event_Type_1', 'Outcome_1', 'Begin_1', 'Outcome_Note_1', 'Event_Type_2', 'Outcome_2', 'Begin_2', 'Outcome_Note_2', 'Event_Type_3', 'Outcome_3', 'Begin_3', 'Outcome_Note_3', 'Authorizer']
     try:
         if input_csv is None:
             input_csv = input('Please enter path to input CSV file: ')
@@ -363,9 +366,7 @@ def set_agent(input_file, api_url, session_file_path, EXE_PATH=EXE_PATH):
 def set_resource_id(value):
     '''Sets the resource ID'''
     if value:
-        header_row, csvfile = opencsv(value)
-        for i in range(2):
-            next(csvfile)
+        csvfile = opencsv(value)
         csvlist = next(csvfile)
         if '/#' in str(csvlist[2]):
             resource_id = (csvlist[2].partition('/#')[0].rpartition('/')[2])
@@ -386,10 +387,8 @@ def set_repository(value, api_url, obj_store):
         if value:
             repo_dict = get_repos(session_data, api_url)
             #logging.debug(repo_dict)
-            header_row, csvfile = opencsv(value)
+            csvfile = opencsv(value)
             #logging.debug(csvfile)
-            for i in range(2):
-                next(csvfile)
             csvlist = next(csvfile)
             return repo_dict[csvlist[0]]
         else:
@@ -401,10 +400,8 @@ def set_repository(value, api_url, obj_store):
     [Input('input_file_dropdown', 'value')])
 def set_parent(value):
     if value:
-        header_row, csvfile = opencsv(value)
+        csvfile = opencsv(value)
         #fix this
-        for i in range(2):
-            next(csvfile)
         csvlist = next(csvfile)
         return str(csvlist[2]).rpartition("_")[2]
     else:
@@ -538,6 +535,15 @@ def create_new_instance(tc_uri, component):
     component['instances'] = new_instance
     return component
 
+def update_extents(component_json, row):
+    component_json['extents'] = [{ "number": '1', "portion": "whole", "extent_type": row['Type_1'], "jsonmodel_type": "extent"}]
+    if row['Number_of_bytes'] != '':
+        container_summary = f"{row['Number_of_bytes']} bytes"
+        if row['Container_Summary'] != '':
+            container_summary = f"{container_summary}; {row['Container_Summary']}"
+        component_json['extents'][0]['container_summary'] = container_summary
+    return component_json
+
 def update_child_component(row, session_data, api_url, ao_id, repo_id):
     #fix the ao_id - WHAT DOES THIS MEAN???????
     component_json = session_data.get(f"{api_url}/repositories/{repo_id}/archival_objects/{ao_id}").json()
@@ -548,10 +554,7 @@ def update_child_component(row, session_data, api_url, ao_id, repo_id):
     #logging.debug(current_top_container_uris)
     component_json['component_id'] = row['Component Unique ID']
     # this overwrites whatever extent may already be there
-    component_json['extents'] = [{ "number": '1', "portion": "whole", "extent_type": row['Type_1'], "jsonmodel_type": "extent"}]
-    if row['Type_2_Number'] != '':
-        component_json['extents'].append({ "number": row['Type_2_Number'], "portion": "whole", "extent_type": row['Type_2'], "jsonmodel_type": "extent"})
-    #component_json['extents'].append({ "number": '1', "portion": "whole", "extent_type": row[5], "jsonmodel_type": "extent"})
+    component_json = update_extents(component_json, row)
     #I want to check against the instance list now before adding the top container data
     if row['Top Container'] not in current_top_container_uris:
         component_json = create_new_instance(row['Top Container'], component_json)
@@ -569,8 +572,7 @@ def create_child_component(row, repo_id, parent_id, resource_id):
                           "jsonmodel_type": "extent"}],
              "resource": {"ref": f"/repositories/{repo_id}/resources/{resource_id}"},
             "parent": {"ref": f"/repositories/{repo_id}/archival_objects/{parent_id}"}}
-    if row['Type_2_Number'] != '':
-        child_component['extents'].append({ "number": row['Type_2_Number'], "portion": "whole", "extent_type": row['Type_2'], "jsonmodel_type": "extent"})
+    child_component = update_extents(child_component, row)
     if row['Top Container'] != '':
         child_component = create_new_instance(row['Top Container'], child_component)
     endpoint = f"/repositories/{repo_id}/archival_objects"
