@@ -39,10 +39,13 @@ TO-DO - progress bar instead of log printing.
 
 '''
 
-#FIX
-EXE_PATH = os.getcwd()
-#EXE_PATH = sys.executable.replace('/born-dig-accessioner', '')
-print(EXE_PATH)
+# I think these have to be different depending on whether it's a PC or Mac; 
+# should probably put it into a function where it returns the one if its PC and the other if its mac
+if sys.platform != "win32":
+    EXE_PATH = sys.executable.replace('/born-dig-accessioner', '')
+else:
+    EXE_PATH = os.getcwd()
+    
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -326,9 +329,10 @@ def set_agent(input_file, api_url, session_file_path, EXE_PATH=EXE_PATH):
                 #logging.debug(session_data)
             if api_url:
                 with open(f'{EXE_PATH}/data/config.json') as cnfg_file:
+                    print(f'{EXE_PATH}/data/config.json')
                     config_file = json.load(cnfg_file)
                     '''Alternatively this can be set within the CSV file itself - that's how Mary has her spreadsheet set up'''
-                    agent_authorizer = config_file['agent_authorizer']
+                    agent_authorizer = config_file.get('agent_authorizer')
                     #logging.debug(f"agent_authorizer: {agent_authorizer}")
                     if (agent_authorizer != "" and agent_authorizer != config_file['api_username']):
                         #logging.debug('SEARCHING AGENTS')
@@ -536,12 +540,17 @@ def create_new_instance(tc_uri, component):
     return component
 
 def update_extents(component_json, row):
+    # this will overwrite any existing extent (which I think is desired...)
     component_json['extents'] = [{ "number": '1', "portion": "whole", "extent_type": row['Type_1'], "jsonmodel_type": "extent"}]
     if row['Number_of_bytes'] != '':
-        container_summary = f"{row['Number_of_bytes']} bytes"
+        second_extent = { "number": row['Number_of_bytes'].replace(',', ''), "portion": "whole", "extent_type": 'bytes', "jsonmodel_type": "extent"}
         if row['Container_Summary'] != '':
-            container_summary = f"{container_summary}; {row['Container_Summary']}"
-        component_json['extents'][0]['container_summary'] = container_summary
+            second_extent['container_summary'] = row['Container_Summary']
+        component_json['extents'].append(second_extent)
+        # container_summary = f"{row['Number_of_bytes']} bytes"
+        # if row['Container_Summary'] != '':
+        #     container_summary = f"{container_summary}; {row['Container_Summary']}"
+        # component_json['extents'][0]['container_summary'] = container_summary
     return component_json
 
 def update_child_component(row, session_data, api_url, ao_id, repo_id):
@@ -566,11 +575,11 @@ def create_child_component(row, repo_id, parent_id, resource_id):
     #First, check if there is a value in the top container field. There won't always be one.
     child_component = {"publish": True, "title": row['Title'], "level": "item",
              "component_id": row['Component Unique ID'], "jsonmodel_type": "archival_object",
-             "extents": [{"number": '1',
-                          "portion": "whole",
-                          "extent_type": row['Type_1'],
-                          "jsonmodel_type": "extent"}],
-             "resource": {"ref": f"/repositories/{repo_id}/resources/{resource_id}"},
+             # "extents": [{"number": '1',
+             #              "portion": "whole",
+             #              "extent_type": row['Type_1'],
+             #              "jsonmodel_type": "extent"}],
+            "resource": {"ref": f"/repositories/{repo_id}/resources/{resource_id}"},
             "parent": {"ref": f"/repositories/{repo_id}/archival_objects/{parent_id}"}}
     child_component = update_extents(child_component, row)
     if row['Top Container'] != '':
@@ -581,14 +590,12 @@ def create_child_component(row, repo_id, parent_id, resource_id):
 # this should have more of the csv processing stuff....
 def create_event(user, ao_id, repo_num, event_type, outcome_value, date_value, note_value, api_url, session_data):
     '''This function creates an event in ASpace, based on the four possible parameters provided in the born-digital accessioning worksheet'''
-    # if date_value != '':
-    #     if '-' in date_value:
-    #         date_value = date_value.replace('-', '/')
-    #     date_value = datetime.datetime.strptime(date_value, '%m/%d/%Y').strftime('%Y-%m-%d')
+    if '/' in date_value:
+        date_value = datetime.datetime.strptime(date_value, '%m/%d/%Y').strftime('%Y-%m-%d')
     event = {"event_type": event_type.lower(), "jsonmodel_type": "event", "outcome": outcome_value.lower(),
             "outcome_note": note_value, "linked_agents": [{ "role": "authorizer", "ref": user}],
-             "linked_records": [{ "role": "source", "ref": '/repositories/' + repo_num + '/archival_objects/' + ao_id }],
-             "date": { "begin": date_value, "date_type": "single", "label": "event", "jsonmodel_type": "date" }}
+             "linked_records": [{ "role": "source", "ref": f'/repositories/{repo_num}/archival_objects/{ao_id}'}],
+             "date": { "begin": date_value, "date_type": "single", "label": "event", "jsonmodel_type": "date"}}
     event_post = session_data.post(f"{api_url}/repositories/{repo_num}/events", json=event).json()
     logging.debug(event_post)
     return event_post
